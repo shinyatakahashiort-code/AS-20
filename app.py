@@ -291,5 +291,8 @@ if st.button("✅ 回答を送信してスコアを表示", type="primary", use_
             結果については主治医にご相談ください。
             """)
 
+        st.subheader("参考論文")
+　　　　1.	Takahashi S, Goseki T, Noda S, Kawanobe T, Ishikawa E, Tanaka Y, et al. Reliability and validity of pre- and post-operative health-related quality of life in strabismus patients using the Japanese version of the adult strabismus questionnaire (AS-20). Jpn J Ophthalmol. 2025. doi:10.1007/s10384-025-01162-x.
+
 st.divider()
 st.caption("© 2025 視覚のQOL調査 AS-20 | すべての回答は自動的に保存されます")
