@@ -118,7 +118,12 @@ def create_visualization(data):
     ax1.set_title('Scores for Each Item (100 points maximum per item)', fontsize=16, fontweight='bold', pad=15)
     ax1.set_xlim(0, 110)
     ax1.invert_yaxis()
-    
+    ax1.grid(axis='x', alpha=0.3, linestyle='--')
+    ax1.grid(axis='x', alpha=0.3, linestyle='--')
+    ax1.axvline(x=75, color='green', linestyle=':', linewidth=2, alpha=0.6, label='Good (75)')
+    ax1.axvline(x=50, color='orange', linestyle=':', linewidth=2, alpha=0.6, label='Moderate (50)')
+    ax1.axvline(x=25, color='red', linestyle=':', linewidth=2, alpha=0.6, label='Low (25)')
+    ax1.legend(loc='lower right', fontsize=9)
     
     # スコアをバーに表示
     for bar, score in zip(bars, data['scores']):
@@ -138,11 +143,6 @@ def create_visualization(data):
     ax2.set_title('Average Score by Category', fontsize=15, fontweight='bold', pad=12)
     ax2.set_ylim(0, 110)
     ax2.grid(axis='y', alpha=0.3, linestyle='--')
-    
-    # 基準線
-    ax2.axhline(y=75, color='green', linestyle=':', linewidth=2, alpha=0.5)
-    ax2.axhline(y=50, color='orange', linestyle=':', linewidth=2, alpha=0.5)
-    ax2.axhline(y=25, color='red', linestyle=':', linewidth=2, alpha=0.5)
     
     # 平均点をバーの上に表示
     for bar, score in zip(bars2, avg_scores):
@@ -291,7 +291,14 @@ if st.button("✅ 回答を送信してスコアを表示", type="primary", use_
             結果については主治医にご相談ください。
             """)
 
-　　　　
 st.divider()
 st.caption("© 2025 視覚のQOL調査 AS-20 | すべての回答は自動的に保存されます")
 
+st.divider()
+st.subheader("📚 参考論文")
+st.markdown("""
+Takahashi S, Goseki T, Noda S, Kawanobe T, Ishikawa E, Tanaka Y, et al. 
+Reliability and validity of pre- and post-operative health-related quality of life in strabismus patients 
+using the Japanese version of the adult strabismus questionnaire (AS-20). 
+*Jpn J Ophthalmol*. 2025. doi:10.1007/s10384-025-01162-x.
+""")
