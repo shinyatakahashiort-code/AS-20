@@ -119,11 +119,6 @@ def create_visualization(data):
     ax1.set_xlim(0, 110)
     ax1.invert_yaxis()
     ax1.grid(axis='x', alpha=0.3, linestyle='--')
-    ax1.grid(axis='x', alpha=0.3, linestyle='--')
-    ax1.axvline(x=75, color='green', linestyle=':', linewidth=2, alpha=0.6, label='Good (75)')
-    ax1.axvline(x=50, color='orange', linestyle=':', linewidth=2, alpha=0.6, label='Moderate (50)')
-    ax1.axvline(x=25, color='red', linestyle=':', linewidth=2, alpha=0.6, label='Low (25)')
-    ax1.legend(loc='lower right', fontsize=9)
     
     # スコアをバーに表示
     for bar, score in zip(bars, data['scores']):
