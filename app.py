@@ -297,3 +297,6 @@ Reliability and validity of pre- and post-operative health-related quality of li
 using the Japanese version of the adult strabismus questionnaire (AS-20). 
 *Jpn J Ophthalmol*. 2025. doi:10.1007/s10384-025-01162-x.
 """)
+st.markdown("""
+髙橋慎也、後関利明、國見敬子
+""")
