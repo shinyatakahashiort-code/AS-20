@@ -1,9 +1,15 @@
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
+import matplotlib
 import json
 import os
 from datetime import datetime
+
+# 日本語フォントの設定
+matplotlib.rcParams['font.family'] = 'sans-serif'
+matplotlib.rcParams['font.sans-serif'] = ['DejaVu Sans', 'Arial', 'Hiragino Sans', 'Yu Gothic', 'Meiryo']
+matplotlib.rcParams['axes.unicode_minus'] = False
 
 # ページ設定
 st.set_page_config(
@@ -97,13 +103,12 @@ def save_response(name, patient_id, responses):
 
 def create_visualization(data):
     """結果のグラフを作成する関数"""
-    fig = plt.figure(figsize=(18, 12))
+    fig = plt.figure(figsize=(18, 10))
     
-    # グリッドレイアウト: 上段に2つのグラフ、下段に質問内容の表
-    gs = fig.add_gridspec(3, 2, width_ratios=[2, 1], height_ratios=[3, 0.1, 1], 
-                          hspace=0.4, wspace=0.3)
+    # グリッドレイアウト: 上段に2つのグラフ
+    gs = fig.add_gridspec(1, 2, width_ratios=[2, 1], hspace=0.3, wspace=0.3)
     
-    # 1. 項目ごとのスコア棒グラフ（左上）
+    # 1. 項目ごとのスコア棒グラフ（左側）
     ax1 = fig.add_subplot(gs[0, 0])
     questions_short = [f"Q{i+1}" for i in range(20)]
     colors = ['#2ECC71' if score == 100 else '#95E1D3' if score == 75 else '#FFD93D' if score == 50 else '#FF9A76' if score == 25 else '#FF6B6B' for score in data['scores']]
@@ -125,7 +130,7 @@ def create_visualization(data):
         ax1.text(width + 2, bar.get_y() + bar.get_height()/2, f'{int(score)}',
                 ha='left', va='center', fontsize=10, fontweight='bold')
     
-    # 2. 平均点の比較（全体・心理面・機能面）（右上）
+    # 2. 平均点の比較（全体・心理面・機能面）（右側）
     ax2 = fig.add_subplot(gs[0, 1])
     categories = ['Overall\n(Q1-20)', 'Psychosocial\n(Q1-10)', 'Functional\n(Q11-20)']
     avg_scores = [data['total_avg'], data['psychosocial_avg'], data['functional_avg']]
@@ -156,66 +161,6 @@ def create_visualization(data):
                 f'{score:.1f}%',
                 ha='center', va='center', fontsize=11, fontweight='bold', 
                 color='white')
-    
-    # 3. 質問内容の表（下段・両列にまたがる）
-    ax3 = fig.add_subplot(gs[2, :])
-    ax3.axis('tight')
-    ax3.axis('off')
-    
-    # 質問内容のリスト（番号なしバージョン）
-    questions_content = [
-        "私の目が人にどう見られるかが気になる",
-        "何も言われなくても、人が私の目のことを気にしているように感じる",
-        "私の目のせいで、人に見られていると不快に感じる",
-        "自分の目のせいで、私を見ている人が、何を考えているのだろうと考えてしまう",
-        "自分の目のせいで、人は私に機会を与えてくれない",
-        "私は自分の目を気にしている",
-        "自分の目のせいで、人は私を見るのを避ける",
-        "自分の目のせいで、他の人より劣っていると感じる",
-        "自分の目のせいで、人は私に対して違う反応をする",
-        "自分の目のせいで、初対面の人との交流が難しいと感じる",
-        "ものが良く見えるように、片方の目を隠したり閉じたりすることがある",
-        "自分の目のせいで、読むのを避けてしまう",
-        "自分の目のせいで、集中できないので、物事を中断している",
-        "奥行きの感覚に問題があると思う",
-        "目が疲れる",
-        "自分の目の調子のせいで、読むことに支障をきたしている",
-        "自分の目が原因で、ストレスを感じる",
-        "自分の目が心配だ",
-        "自分の目が気になって、趣味を楽しめない",
-        "自分の目のせいで、読むときに頻繁に休憩する必要がある"
-    ]
-    
-    # 表のデータを作成（2列に分割）
-    table_data = []
-    for i in range(10):  # 10行
-        left_q = f"Q{i+1}: {questions_content[i]}"
-        right_q = f"Q{i+11}: {questions_content[i+10]}"
-        table_data.append([left_q, right_q])
-    
-    # 表を作成
-    table = ax3.table(cellText=table_data,
-                     cellLoc='left',
-                     loc='center',
-                     colWidths=[0.5, 0.5])
-    
-    table.auto_set_font_size(False)
-    table.set_fontsize(9)
-    table.scale(1, 2)
-    
-    # セルのスタイル設定
-    for i in range(10):
-        for j in range(2):
-            cell = table[(i, j)]
-            cell.set_facecolor('#f0f0f0' if i % 2 == 0 else 'white')
-            cell.set_edgecolor('#cccccc')
-            cell.set_linewidth(0.5)
-    
-    # タイトルを追加
-    ax3.text(0.5, 1.15, 'Question Items Reference', 
-            transform=ax3.transAxes,
-            ha='center', va='bottom',
-            fontsize=14, fontweight='bold')
     
     plt.tight_layout()
     return fig
@@ -303,6 +248,39 @@ if st.button("✅ 回答を送信してスコアを表示", type="primary", use_
         # グラフ表示
         fig = create_visualization(data)
         st.pyplot(fig)
+        
+        # 質問内容の表示（Streamlitの表として追加）
+        st.subheader("📋 質問項目一覧")
+        
+        # 質問内容をDataFrameで表示
+        questions_df = pd.DataFrame({
+            'Q1-Q10 (心理社会面)': [
+                "Q1: 私の目が人にどう見られるかが気になる",
+                "Q2: 何も言われなくても、人が私の目のことを気にしているように感じる",
+                "Q3: 私の目のせいで、人に見られていると不快に感じる",
+                "Q4: 自分の目のせいで、私を見ている人が、何を考えているのだろうと考えてしまう",
+                "Q5: 自分の目のせいで、人は私に機会を与えてくれない",
+                "Q6: 私は自分の目を気にしている",
+                "Q7: 自分の目のせいで、人は私を見るのを避ける",
+                "Q8: 自分の目のせいで、他の人より劣っていると感じる",
+                "Q9: 自分の目のせいで、人は私に対して違う反応をする",
+                "Q10: 自分の目のせいで、初対面の人との交流が難しいと感じる"
+            ],
+            'Q11-Q20 (機能面)': [
+                "Q11: ものが良く見えるように、片方の目を隠したり閉じたりすることがある",
+                "Q12: 自分の目のせいで、読むのを避けてしまう",
+                "Q13: 自分の目のせいで、集中できないので、物事を中断している",
+                "Q14: 奥行きの感覚に問題があると思う",
+                "Q15: 目が疲れる",
+                "Q16: 自分の目の調子のせいで、読むことに支障をきたしている",
+                "Q17: 自分の目が原因で、ストレスを感じる",
+                "Q18: 自分の目が心配だ",
+                "Q19: 自分の目が気になって、趣味を楽しめない",
+                "Q20: 自分の目のせいで、読むときに頻繁に休憩する必要がある"
+            ]
+        })
+        
+        st.dataframe(questions_df, use_container_width=True, hide_index=True)
         
         # 解釈ガイド
         with st.expander("📖 結果の解釈ガイド"):
