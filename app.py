@@ -97,26 +97,26 @@ def save_response(name, patient_id, responses):
 
 def create_visualization(data):
     """結果のグラフを作成する関数"""
-    fig = plt.figure(figsize=(18, 10))
+    fig = plt.figure(figsize=(18, 12))
     
-    # グリッドレイアウト
-    gs = fig.add_gridspec(2, 2, width_ratios=[2, 1], height_ratios=[1, 1], 
-                          hspace=0.3, wspace=0.3)
+    # グリッドレイアウト: 上段に2つのグラフ、下段に質問内容の表
+    gs = fig.add_gridspec(3, 2, width_ratios=[2, 1], height_ratios=[3, 0.1, 1], 
+                          hspace=0.4, wspace=0.3)
     
-    # 1. 項目ごとのスコア棒グラフ（左側全体）
-    ax1 = fig.add_subplot(gs[:, 0])
+    # 1. 項目ごとのスコア棒グラフ（左上）
+    ax1 = fig.add_subplot(gs[0, 0])
     questions_short = [f"Q{i+1}" for i in range(20)]
     colors = ['#2ECC71' if score == 100 else '#95E1D3' if score == 75 else '#FFD93D' if score == 50 else '#FF9A76' if score == 25 else '#FF6B6B' for score in data['scores']]
     bars = ax1.barh(questions_short, data['scores'], color=colors, edgecolor='black', linewidth=0.8)
-    ax1.set_xlabel('Score (out of 100)）', fontsize=13, fontweight='bold')
+    ax1.set_xlabel('Score (out of 100)', fontsize=13, fontweight='bold')
     ax1.set_ylabel('Question Items', fontsize=13, fontweight='bold')
-    ax1.set_title('Scores for each item (100 points maximum per item)', fontsize=16, fontweight='bold', pad=15)
+    ax1.set_title('Scores for Each Item (100 points maximum per item)', fontsize=16, fontweight='bold', pad=15)
     ax1.set_xlim(0, 110)
     ax1.invert_yaxis()
     ax1.grid(axis='x', alpha=0.3, linestyle='--')
-    ax1.axvline(x=75, color='green', linestyle=':', linewidth=2, alpha=0.6, label='75')
-    ax1.axvline(x=50, color='orange', linestyle=':', linewidth=2, alpha=0.6, label='50')
-    ax1.axvline(x=25, color='red', linestyle=':', linewidth=2, alpha=0.6, label='25点')
+    ax1.axvline(x=75, color='green', linestyle=':', linewidth=2, alpha=0.6, label='Good (75)')
+    ax1.axvline(x=50, color='orange', linestyle=':', linewidth=2, alpha=0.6, label='Moderate (50)')
+    ax1.axvline(x=25, color='red', linestyle=':', linewidth=2, alpha=0.6, label='Low (25)')
     ax1.legend(loc='lower right', fontsize=9)
     
     # スコアをバーに表示
@@ -125,13 +125,18 @@ def create_visualization(data):
         ax1.text(width + 2, bar.get_y() + bar.get_height()/2, f'{int(score)}',
                 ha='left', va='center', fontsize=10, fontweight='bold')
     
-    # 2. 平均点の比較（全体・心理面・機能面）
+    # 2. 平均点の比較（全体・心理面・機能面）（右上）
     ax2 = fig.add_subplot(gs[0, 1])
-    categories = ['All\n(Q1-20)', 'Psychosocia\n(Q1-10)', 'Functional\n(Q11-20)']
+    categories = ['Overall\n(Q1-20)', 'Psychosocial\n(Q1-10)', 'Functional\n(Q11-20)']
     avg_scores = [data['total_avg'], data['psychosocial_avg'], data['functional_avg']]
     colors_bar = ['#9B59B6', '#E74C3C', '#3498DB']
     
-    
+    bars2 = ax2.bar(categories, avg_scores, color=colors_bar, 
+                    edgecolor='black', linewidth=1.5, alpha=0.85, width=0.6)
+    ax2.set_ylabel('Average Score (out of 100)', fontsize=12, fontweight='bold')
+    ax2.set_title('Average Score by Category', fontsize=15, fontweight='bold', pad=12)
+    ax2.set_ylim(0, 110)
+    ax2.grid(axis='y', alpha=0.3, linestyle='--')
     
     # 基準線
     ax2.axhline(y=75, color='green', linestyle=':', linewidth=2, alpha=0.5)
@@ -142,7 +147,7 @@ def create_visualization(data):
     for bar, score in zip(bars2, avg_scores):
         height = bar.get_height()
         ax2.text(bar.get_x() + bar.get_width()/2., height + 3,
-                f'{score:.1f}点',
+                f'{score:.1f}',
                 ha='center', va='bottom', fontsize=13, fontweight='bold')
     
     # 達成率も表示（バー内部）
@@ -152,49 +157,65 @@ def create_visualization(data):
                 ha='center', va='center', fontsize=11, fontweight='bold', 
                 color='white')
     
-    # 3. 心理社会面と機能面の比較グラフ
-    ax3 = fig.add_subplot(gs[1, 1])
-    comparison_categories = ['心理社会面\n(Q1-10)', '機能面\n(Q11-20)']
-    comparison_scores = [data['psychosocial_avg'], data['functional_avg']]
-    comparison_colors = ['#E74C3C', '#3498DB']
+    # 3. 質問内容の表（下段・両列にまたがる）
+    ax3 = fig.add_subplot(gs[2, :])
+    ax3.axis('tight')
+    ax3.axis('off')
     
-    bars3 = ax3.bar(comparison_categories, comparison_scores, 
-                    color=comparison_colors, edgecolor='black', 
-                    linewidth=1.5, alpha=0.85, width=0.5)
-    ax3.set_ylabel('平均点（100点満点）', fontsize=12, fontweight='bold')
-    ax3.set_title('心理社会面 vs 機能面', fontsize=15, fontweight='bold', pad=12)
-    ax3.set_ylim(0, 110)
-    ax3.grid(axis='y', alpha=0.3, linestyle='--')
+    # 質問内容のリスト（番号なしバージョン）
+    questions_content = [
+        "私の目が人にどう見られるかが気になる",
+        "何も言われなくても、人が私の目のことを気にしているように感じる",
+        "私の目のせいで、人に見られていると不快に感じる",
+        "自分の目のせいで、私を見ている人が、何を考えているのだろうと考えてしまう",
+        "自分の目のせいで、人は私に機会を与えてくれない",
+        "私は自分の目を気にしている",
+        "自分の目のせいで、人は私を見るのを避ける",
+        "自分の目のせいで、他の人より劣っていると感じる",
+        "自分の目のせいで、人は私に対して違う反応をする",
+        "自分の目のせいで、初対面の人との交流が難しいと感じる",
+        "ものが良く見えるように、片方の目を隠したり閉じたりすることがある",
+        "自分の目のせいで、読むのを避けてしまう",
+        "自分の目のせいで、集中できないので、物事を中断している",
+        "奥行きの感覚に問題があると思う",
+        "目が疲れる",
+        "自分の目の調子のせいで、読むことに支障をきたしている",
+        "自分の目が原因で、ストレスを感じる",
+        "自分の目が心配だ",
+        "自分の目が気になって、趣味を楽しめない",
+        "自分の目のせいで、読むときに頻繁に休憩する必要がある"
+    ]
     
-    # 基準線
-    ax3.axhline(y=75, color='green', linestyle=':', linewidth=2, alpha=0.5, label='良好(75点)')
-    ax3.axhline(y=50, color='orange', linestyle=':', linewidth=2, alpha=0.5, label='中程度(50点)')
-    ax3.axhline(y=25, color='red', linestyle=':', linewidth=2, alpha=0.5, label='低下(25点)')
-    ax3.legend(loc='upper right', fontsize=8)
+    # 表のデータを作成（2列に分割）
+    table_data = []
+    for i in range(10):  # 10行
+        left_q = f"Q{i+1}: {questions_content[i]}"
+        right_q = f"Q{i+11}: {questions_content[i+10]}"
+        table_data.append([left_q, right_q])
     
-    # スコア表示
-    for bar, score in zip(bars3, comparison_scores):
-        height = bar.get_height()
-        ax3.text(bar.get_x() + bar.get_width()/2., height + 3,
-                f'{score:.1f}点',
-                ha='center', va='bottom', fontsize=13, fontweight='bold')
-        ax3.text(bar.get_x() + bar.get_width()/2., score/2,
-                f'{score:.1f}%',
-                ha='center', va='center', fontsize=11, fontweight='bold', 
-                color='white')
+    # 表を作成
+    table = ax3.table(cellText=table_data,
+                     cellLoc='left',
+                     loc='center',
+                     colWidths=[0.5, 0.5])
     
-    # 差を表示
-    diff = abs(data['psychosocial_avg'] - data['functional_avg'])
-    if diff > 10:
-        if data['psychosocial_avg'] > data['functional_avg']:
-            diff_text = f'心理社会面が{diff:.1f}点高い'
-            arrow_color = '#E74C3C'
-        else:
-            diff_text = f'機能面が{diff:.1f}点高い'
-            arrow_color = '#3498DB'
-        ax3.text(0.5, 0.95, diff_text, transform=ax3.transAxes,
-                ha='center', va='top', fontsize=10, fontweight='bold',
-                bbox=dict(boxstyle='round,pad=0.5', facecolor=arrow_color, alpha=0.3))
+    table.auto_set_font_size(False)
+    table.set_fontsize(9)
+    table.scale(1, 2)
+    
+    # セルのスタイル設定
+    for i in range(10):
+        for j in range(2):
+            cell = table[(i, j)]
+            cell.set_facecolor('#f0f0f0' if i % 2 == 0 else 'white')
+            cell.set_edgecolor('#cccccc')
+            cell.set_linewidth(0.5)
+    
+    # タイトルを追加
+    ax3.text(0.5, 1.15, 'Question Items Reference', 
+            transform=ax3.transAxes,
+            ha='center', va='bottom',
+            fontsize=14, fontweight='bold')
     
     plt.tight_layout()
     return fig
