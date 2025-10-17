@@ -13,7 +13,7 @@ matplotlib.rcParams['axes.unicode_minus'] = False
 
 # ページ設定
 st.set_page_config(
-    page_title="視覚のQOL調査 AS-20",
+    page_title="視覚のQOL調査 AS-20(日本語版)",
     page_icon="👁️",
     layout="wide"
 )
