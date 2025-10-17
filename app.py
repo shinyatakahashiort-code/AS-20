@@ -108,15 +108,15 @@ def create_visualization(data):
     questions_short = [f"Q{i+1}" for i in range(20)]
     colors = ['#2ECC71' if score == 100 else '#95E1D3' if score == 75 else '#FFD93D' if score == 50 else '#FF9A76' if score == 25 else '#FF6B6B' for score in data['scores']]
     bars = ax1.barh(questions_short, data['scores'], color=colors, edgecolor='black', linewidth=0.8)
-    ax1.set_xlabel('スコア（100点満点）', fontsize=13, fontweight='bold')
-    ax1.set_ylabel('質問項目', fontsize=13, fontweight='bold')
-    ax1.set_title('項目ごとのスコア（各項目100点満点）', fontsize=16, fontweight='bold', pad=15)
+    ax1.set_xlabel('Score (out of 100)）', fontsize=13, fontweight='bold')
+    ax1.set_ylabel('Question Items', fontsize=13, fontweight='bold')
+    ax1.set_title('Scores for each item (100 points maximum per item)', fontsize=16, fontweight='bold', pad=15)
     ax1.set_xlim(0, 110)
     ax1.invert_yaxis()
     ax1.grid(axis='x', alpha=0.3, linestyle='--')
-    ax1.axvline(x=75, color='green', linestyle=':', linewidth=2, alpha=0.6, label='良好ライン(75点)')
-    ax1.axvline(x=50, color='orange', linestyle=':', linewidth=2, alpha=0.6, label='中程度ライン(50点)')
-    ax1.axvline(x=25, color='red', linestyle=':', linewidth=2, alpha=0.6, label='低下ライン(25点)')
+    ax1.axvline(x=75, color='green', linestyle=':', linewidth=2, alpha=0.6, label='75')
+    ax1.axvline(x=50, color='orange', linestyle=':', linewidth=2, alpha=0.6, label='50')
+    ax1.axvline(x=25, color='red', linestyle=':', linewidth=2, alpha=0.6, label='25点')
     ax1.legend(loc='lower right', fontsize=9)
     
     # スコアをバーに表示
@@ -127,16 +127,11 @@ def create_visualization(data):
     
     # 2. 平均点の比較（全体・心理面・機能面）
     ax2 = fig.add_subplot(gs[0, 1])
-    categories = ['全体\n(Q1-20)', '心理社会面\n(Q1-10)', '機能面\n(Q11-20)']
+    categories = ['All\n(Q1-20)', 'Psychosocia\n(Q1-10)', 'Functional\n(Q11-20)']
     avg_scores = [data['total_avg'], data['psychosocial_avg'], data['functional_avg']]
     colors_bar = ['#9B59B6', '#E74C3C', '#3498DB']
     
-    bars2 = ax2.bar(categories, avg_scores, color=colors_bar, 
-                    edgecolor='black', linewidth=1.5, alpha=0.85, width=0.6)
-    ax2.set_ylabel('平均点（100点満点）', fontsize=12, fontweight='bold')
-    ax2.set_title('カテゴリー別平均点', fontsize=15, fontweight='bold', pad=12)
-    ax2.set_ylim(0, 110)
-    ax2.grid(axis='y', alpha=0.3, linestyle='--')
+    
     
     # 基準線
     ax2.axhline(y=75, color='green', linestyle=':', linewidth=2, alpha=0.5)
