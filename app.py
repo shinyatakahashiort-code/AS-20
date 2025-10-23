@@ -181,14 +181,22 @@ st.subheader("📝 アンケート質問")
 st.caption("*すべての質問にお答えください*")
 
 # 20個の質問を表示
+# 変更後 (172行目から)
 responses = []
 for i, question in enumerate(QUESTIONS):
+    # ▼▼▼ 1. このst.markdownを挿入 ▼▼▼
+    st.markdown(
+        f"<span style='color:darkblue;'><b>{question}</b></span>", 
+        unsafe_allow_html=True
+    )
+    
     response = st.radio(
-        question,
+        question,  # この行は変更不要（非表示になります）
         options=LIKERT_OPTIONS,
         index=None,
         key=f"q{i}",
-        horizontal=True
+        horizontal=True,
+        label_visibility="collapsed"  # <- ▲▲▲ 2. この行を追加
     )
     responses.append(response)
 
